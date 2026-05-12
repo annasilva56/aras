@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Aras Trucking LLC — Operations Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080a12;
+  --surface:#0e1120;
+  --surface2:#141729;
+  --border:#1c2038;
+  --border2:#242840;
+  --orange:#f97316;
+  --orange2:#ea580c;
+  --amber:#fbbf24;
+  --blue:#3b82f6;
+  --green:#22c55e;
+  --red:#ef4444;
+  --purple:#a855f7;
+  --cyan:#06b6d4;
+  --text:#e2e8f0;
+  --muted:#64748b;
+  --dim:#2d3555;
+  --font-display:'Barlow Condensed',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+  --font-body:'Barlow',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;overflow:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  width:220px;min-width:220px;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  transition:all .3s;overflow:hidden;position:relative;z-index:10;
+}
+.logo-wrap{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
+.logo-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--orange),var(--orange2));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;
+  box-shadow:0 0 20px rgba(249,115,22,.25)}
+.logo-name{font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:2px;color:#fff}
+.logo-sub{font-family:var(--font-mono);font-size:9px;color:var(--orange);letter-spacing:3px}
+.hq-badge{margin-top:10px;padding:7px 10px;background:rgba(249,115,22,.08);
+  border:1px solid rgba(249,115,22,.15);border-radius:8px;
+  font-family:var(--font-mono);font-size:9px;color:var(--amber);letter-spacing:1px;
+  display:flex;align-items:center;gap:6px}
+
+.nav-section{font-family:var(--font-mono);font-size:9px;color:var(--dim);
+  letter-spacing:2px;padding:14px 16px 6px;text-transform:uppercase}
+.nav-btn{
+  width:100%;display:flex;align-items:center;gap:10px;padding:10px 16px;
+  background:transparent;border:none;cursor:pointer;color:var(--muted);
+  font-family:var(--font-body);font-size:13px;font-weight:500;
+  text-align:left;transition:all .2s;border-left:3px solid transparent;position:relative;
+}
+.nav-btn:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.nav-btn.active{color:var(--orange);background:rgba(249,115,22,.07);border-left-color:var(--orange)}
+.nav-btn .icon{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--orange);color:#fff;font-size:9px;
+  font-family:var(--font-mono);padding:2px 6px;border-radius:10px;font-weight:700}
+
+.sidebar-footer{margin-top:auto;padding:12px 16px;border-top:1px solid var(--border)}
+.fleet-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+.fleet-stat span:first-child{color:var(--muted);font-family:var(--font-mono)}
+.fleet-stat span:last-child{font-weight:700;font-family:var(--font-mono)}
+
+/* ── MAIN ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── TOPBAR ── */
+#topbar{
+  padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;flex-shrink:0;
+}
+.topbar-title{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:1px}
+.topbar-sub{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px}
+.topbar-stats{margin-left:auto;display:flex;gap:20px;align-items:center}
+.top-stat{text-align:right}
+.top-stat-val{font-family:var(--font-mono);font-size:13px;font-weight:600}
+.top-stat-lbl{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:1px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 8px var(--green)}50%{box-shadow:0 0 16px var(--green)}}
+.menu-btn{background:transparent;border:1px solid var(--border2);color:var(--muted);
+  padding:7px 10px;border-radius:6px;cursor:pointer;font-size:14px;transition:.2s}
+.menu-btn:hover{color:var(--text);border-color:var(--border2)}
+
+/* ── CONTENT ── */
+#content{flex:1;overflow-y:auto;padding:24px}
+.page{display:none;animation:fadeUp .3s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PAGE HEADER ── */
+.page-hdr{margin-bottom:24px}
+.page-hdr h1{font-family:var(--font-display);font-size:28px;font-weight:800;letter-spacing:1px;color:#fff}
+.page-hdr p{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:1px}
+
+/* ── GRID ── */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g12{grid-template-columns:1fr 2fr}
+.g21{grid-template-columns:2fr 1fr}
+
+/* ── KPI CARD ── */
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:18px;position:relative;overflow:hidden;transition:.2s}
+.kpi:hover{border-color:var(--border2)}
+.kpi-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.kpi-val{font-family:var(--font-display);font-size:32px;font-weight:700;margin:6px 0 4px;line-height:1}
+.kpi-sub{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+.kpi-icon{position:absolute;right:16px;top:16px;font-size:28px;opacity:.25}
+.kpi-bar{height:3px;border-radius:2px;margin-top:12px;background:var(--border)}
+.kpi-bar-fill{height:100%;border-radius:2px}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card-title{font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:1px;
+  color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title span{font-size:16px}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:2px;
+  padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);text-transform:uppercase}
+.tbl td{padding:11px 12px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:11px;color:var(--text)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:1px}
+.badge-green{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--blue)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-purple{background:rgba(168,85,247,.15);color:var(--purple)}
+.badge-amber{background:rgba(251,191,36,.15);color:var(--amber)}
+
+/* ── FORM ── */
+.form-row{display:grid;gap:12px;margin-bottom:12px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.form-input{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+  padding:10px 14px;color:var(--text);font-family:var(--font-mono);font-size:12px;
+  outline:none;transition:.2s}
+.form-input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(249,115,22,.1)}
+select.form-input option{background:var(--surface2)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;
+  border:none;cursor:pointer;font-family:var(--font-mono);font-size:12px;font-weight:600;
+  letter-spacing:.5px;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
+.btn-primary:hover{box-shadow:0 0 16px rgba(249,115,22,.4);transform:translateY(-1px)}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.btn-sm{padding:6px 14px;font-size:11px}
+
+/* ── AI CHAT ── */
+#chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 120px)}
+#chat-messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:4px 0 16px}
+.chat-msg{display:flex;gap:10px;animation:fadeUp .3s ease}
+.chat-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:15px;flex-shrink:0;margin-top:2px}
+.chat-avatar.ai{background:linear-gradient(135deg,var(--orange),var(--orange2));box-shadow:0 0 12px rgba(249,115,22,.3)}
+.chat-avatar.user{background:var(--surface2);border:1px solid var(--border2)}
+.chat-bubble{max-width:78%;padding:13px 16px;border-radius:4px 14px 14px 14px;
+  background:var(--surface2);border:1px solid var(--border);font-size:13px;line-height:1.7;color:var(--text)}
+.chat-bubble.user{background:linear-gradient(135deg,rgba(249,115,22,.15),rgba(234,88,12,.1));
+  border-color:rgba(249,115,22,.2);border-radius:14px 14px 4px 14px;color:#fde8d8}
+.chat-bubble h1{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--orange);margin-bottom:8px}
+.chat-bubble h2{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--amber);margin:10px 0 4px}
+.chat-bubble strong{color:var(--amber)}
+.chat-bubble .bullet{display:flex;gap:6px;margin:3px 0}
+.chat-bubble .bullet::before{content:"▸";color:var(--orange);flex-shrink:0}
+#chat-input-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:8px 8px 8px 16px;display:flex;gap:10px;align-items:center}
+#chat-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);
+  font-family:var(--font-mono);font-size:13px}
+#chat-input::placeholder{color:var(--dim)}
+.typing{display:flex;gap:5px;align-items:center;padding:2px 0}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--orange);
+  animation:bounce .9s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+.quick-chip{padding:7px 14px;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:20px;color:var(--muted);font-size:11px;font-family:var(--font-mono);
+  cursor:pointer;transition:.2s;white-space:nowrap}
+.quick-chip:hover{border-color:var(--orange);color:var(--orange);background:rgba(249,115,22,.06)}
+
+/* ── STATES GRID ── */
+.states-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.state-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:10px 8px;text-align:center;cursor:pointer;transition:.2s}
+.state-card:hover{border-color:var(--orange);background:rgba(249,115,22,.06)}
+.state-card.hq{border-color:rgba(249,115,22,.4);background:rgba(249,115,22,.08)}
+.state-code{font-family:var(--font-display);font-size:16px;font-weight:700;color:#fff}
+.state-name{font-family:var(--font-mono);font-size:8px;color:var(--muted);margin-top:2px;letter-spacing:.5px}
+.state-hq{font-family:var(--font-mono);font-size:7px;color:var(--orange);letter-spacing:1px}
+
+/* ── PROGRESS ── */
+.progress-wrap{background:var(--border);border-radius:4px;height:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;transition:.6s}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;
+  display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;
+  width:560px;max-width:95vw;padding:28px;animation:fadeUp .3s ease}
+.modal-title{font-family:var(--font-display);font-size:22px;font-weight:700;margin-bottom:20px;color:#fff}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  #sidebar{width:0;min-width:0}
+  #sidebar.open{width:220px;min-width:220px}
+  .g4{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr}
+  .g12,.g21{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="logo-wrap">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div class="logo-icon">🚛</div>
+      <div>
+        <div class="logo-name">ARAS</div>
+        <div class="logo-sub">TRUCKING LLC</div>
+      </div>
+    </div>
+    <div class="hq-badge">🌴 ORLANDO, FLORIDA • EST. 2024</div>
+  </div>
+
+  <div class="nav-section">Main</div>
+  <button class="nav-btn active" onclick="showPage('dashboard',this)"><span class="icon">📊</span>Dashboard</button>
+  <button class="nav-btn" onclick="showPage('ai',this)"><span class="icon">🤖</span>AI Assistant</button>
+
+  <div class="nav-section">Operations</div>
+  <button class="nav-btn" onclick="showPage('loads',this)"><span class="icon">📦</span>Loads <span class="nav-badge">14</span></button>
+  <button class="nav-btn" onclick="showPage('ownerop',this)"><span class="icon">🤝</span>Owner-Operator</button>
+  <button class="nav-btn" onclick="showPage('fuel',this)"><span class="icon">⛽</span>Fuel / IFTA</button>
+  <button class="nav-btn" onclick="showPage('rental',this)"><span class="icon">🚚</span>Rental</button>
+
+  <div class="nav-section">Management</div>
+  <button class="nav-btn" onclick="showPage('insurance',this)"><span class="icon">🛡️</span>Insurance</button>
+  <button class="nav-btn" onclick="showPage('finance',this)"><span class="icon">💰</span>Financials</button>
+  <button class="nav-btn" onclick="showPage('states',this)"><span class="icon">🗺️</span>50 States</button>
+  <button class="nav-btn" onclick="showPage('compliance',this)"><span class="icon">📋</span>DOT / FMCSA</button>
+
+  <div class="sidebar-footer">
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--dim);letter-spacing:2px;margin-bottom:8px">LIVE FLEET</div>
+    <div class="fleet-stat"><span>Active Trucks</span><span style="color:var(--green)">18</span></div>
+    <div class="fleet-stat"><span>In Maintenance</span><span style="color:var(--amber)">3</span></div>
+    <div class="fleet-stat"><span>In Transit</span><span style="color:var(--blue)">14</span></div>
+    <div class="fleet-stat"><span>Owner-Ops</span><span style="color:var(--purple)">7</span></div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div>
+      <div class="topbar-title" id="topbar-title">DASHBOARD</div>
+      <div class="topbar-sub">ARAS TRUCKING LLC • ORLANDO, FL • ALL 50 STATES 🇺🇸</div>
+    </div>
+    <div class="topbar-stats">
+      <div class="top-stat">
+        <div class="top-stat-val" style="color:var(--green)">$3.24<span style="font-size:10px">/mi</span></div>
+        <div class="top-stat-lbl">RATE AVG</div>
+      </div>
+      <div class="top-stat">
+        <div class="top-stat-val" style="color:var(--amber)">$3.81<span style="font-size:10px">/gal</span></div>
+        <div class="top-stat-lbl">DIESEL</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="status-dot"></div>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--green)">ONLINE</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-hdr">
+        <h1>Operations Dashboard</h1>
+        <p>ORLANDO HQ • REAL-TIME OVERVIEW • ALL 50 STATES COVERAGE</p>
+      </div>
+
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="kpi">
+          <div class="kpi-label">Weekly Revenue</div>
+          <div class="kpi-val" style="color:var(--green)">$84,320</div>
+          <div class="kpi-sub">↑ 12% vs last week</div>
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:72%;background:var(--green)"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Active Loads</div>
+          <div class="kpi-val" style="color:var(--blue)">14</div>
+          <div class="kpi-sub">8 on-time • 2 delayed</div>
+          <div class="kpi-icon">📦</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:58%;background:var(--blue)"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Operating Ratio</div>
+          <div class="kpi-val" style="color:var(--amber)">81.4%</div>
+          <div class="kpi-sub">Target: under 85%</div>
+          <div class="kpi-icon">📊</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:81%;background:var(--amber)"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Fleet Utilization</div>
+          <div class="kpi-val" style="color:var(--orange)">86%</div>
+          <div class="kpi-sub">18 of 21 trucks active</div>
+          <div class="kpi-icon">🚛</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:86%;background:var(--orange)"></div></div>
+        </div>
+      </div>
+
+      <div class="grid g12" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-title"><span>📦</span>Active Loads — This Week</div>
+          <table class="tbl">
+            <thead><tr><th>Load ID</th><th>Route</th><th>Driver / O/O</th><th>Miles</th><th>Rate</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>AT-2048</td><td>Orlando FL → Houston TX</td><td>Marcus R.</td><td>1,092</td><td>$3,504</td><td><span class="badge badge-green">IN TRANSIT</span></td></tr>
+              <tr><td>AT-2049</td><td>Miami FL → Atlanta GA</td><td>O/O: J. Silva</td><td>662</td><td>$2,317</td><td><span class="badge badge-green">IN TRANSIT</span></td></tr>
+              <tr><td>AT-2050</td><td>Orlando FL → Charlotte NC</td><td>Derek W.</td><td>728</td><td>$2,548</td><td><span class="badge badge-blue">LOADING</span></td></tr>
+              <tr><td>AT-2051</td><td>Tampa FL → Nashville TN</td><td>O/O: R. Patel</td><td>764</td><td>$2,673</td><td><span class="badge badge-amber">DELAYED</span></td></tr>
+              <tr><td>AT-2052</td><td>Jacksonville FL → Dallas TX</td><td>Tony M.</td><td>1,024</td><td>$3,584</td><td><span class="badge badge-orange">DISPATCHED</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="card-title"><span>⛽</span>Fuel This Week</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-family:var(--font-mono);font-size:11px">Total Gallons</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--amber)">4,820 gal</span></div><div class="progress-wrap"><div class="progress-fill" style="width:62%;background:var(--amber)"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-family:var(--font-mono);font-size:11px">Fuel Cost</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--red)">$18,364</span></div><div class="progress-wrap"><div class="progress-fill" style="width:48%;background:var(--red)"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-family:var(--font-mono);font-size:11px">Avg Fleet MPG</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green)">6.8 MPG</span></div><div class="progress-wrap"><div class="progress-fill" style="width:68%;background:var(--green)"></div></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span>🤝</span>O/O Settlements Due</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-mono);font-size:11px">J. Silva (75/25)</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--green);font-weight:700">$1,738</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-mono);font-size:11px">R. Patel (70/30)</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--green);font-weight:700">$1,871</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-mono);font-size:11px">A. Chen (80/20)</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--amber);font-weight:700">$2,144</span></div>
+              <div class="divider" style="margin:6px 0"></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">Total Payable</span><span style="font-family:var(--font-display);font-size:18px;color:var(--green);font-weight:700">$5,753</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid g3">
+        <div class="card">
+          <div class="card-title"><span>🛡️</span>Insurance Alerts</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="padding:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px"><div style="font-family:var(--font-mono);font-size:11px;color:var(--red)">⚠ EXPIRES IN 12 DAYS</div><div style="font-size:12px;margin-top:2px">Primary Liability — Truck FL-204</div></div>
+            <div style="padding:10px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:8px"><div style="font-family:var(--font-mono);font-size:11px;color:var(--amber)">⚡ EXPIRES IN 28 DAYS</div><div style="font-size:12px;margin-top:2px">Cargo — Trucks FL-201 thru 205</div></div>
+            <div style="padding:10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:8px"><div style="font-family:var(--font-mono);font-size:11px;color:var(--green)">✓ ALL OTHERS CURRENT</div><div style="font-size:12px;margin-top:2px">16 policies active & valid</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>📋</span>Compliance Status</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-family:var(--font-mono);font-size:11px">CSA Safety Score</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:700">28/100 ✓</span></div><div class="progress-wrap"><div class="progress-fill" style="width:28%;background:var(--green)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-family:var(--font-mono);font-size:11px">HOS Violations</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:700">0 this week</span></div><div class="progress-wrap"><div class="progress-fill" style="width:0%;background:var(--green)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-family:var(--font-mono);font-size:11px">Annual DOT Inspect.</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--amber);font-weight:700">3 due</span></div><div class="progress-wrap"><div class="progress-fill" style="width:14%;background:var(--amber)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-family:var(--font-mono);font-size:11px">Medical Cards Current</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:700">18/18</span></div><div class="progress-wrap"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>💰</span>Cost per Mile Breakdown</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-mono);font-size:11px">Fuel</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--amber)">$0.56/mi</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-mono);font-size:11px">Driver Pay</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--blue)">$0.68/mi</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-mono);font-size:11px">Maintenance</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--purple)">$0.18/mi</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-mono);font-size:11px">Insurance</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--red)">$0.12/mi</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-mono);font-size:11px">Overhead/Admin</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--muted)">$0.08/mi</span></div>
+            <div class="divider" style="margin:4px 0"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-mono);font-size:12px;font-weight:700">Total CPM</span><span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--orange)">$1.62/mi</span></div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--green)">Margin: $1.62 avg → $3.24 rate = 50% gross</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AI ASSISTANT ══ -->
+    <div class="page" id="page-ai">
+      <div class="page-hdr">
+        <h1>AI Operations Assistant</h1>
+        <p>POWERED BY CLAUDE • TRUCKING SPECIALIST • ENGLISH & PORTUGUESE</p>
+      </div>
+      <div id="chat-wrap">
+        <div id="chat-messages">
+          <div class="chat-msg">
+            <div class="chat-avatar ai">🚛</div>
+            <div class="chat-bubble">
+              <h1>Aras Trucking AI Assistant</h1>
+              I'm your specialized trucking operations AI. Ask me anything about:<br><br>
+              <div class="bullet">Fuel logs, MPG, IFTA quarterly tax calculations</div>
+              <div class="bullet">Load rates, BOL, POD, broker negotiations</div>
+              <div class="bullet">Owner-Operator settlements & 75/25 splits</div>
+              <div class="bullet">Insurance policies, claims, COI requests</div>
+              <div class="bullet">Permits & regulations for all 50 states</div>
+              <div class="bullet">DOT/FMCSA compliance, CSA scores, HOS</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" id="quick-chips">
+          <div class="quick-chip" onclick="chipSend(this)">⛽ Calculate IFTA for Q2</div>
+          <div class="quick-chip" onclick="chipSend(this)">🤝 75/25 split on $3,200 load</div>
+          <div class="quick-chip" onclick="chipSend(this)">📦 New load FL → TX rate</div>
+          <div class="quick-chip" onclick="chipSend(this)">🗺️ Oversize permit for CA</div>
+          <div class="quick-chip" onclick="chipSend(this)">📋 HOS rules summary</div>
+          <div class="quick-chip" onclick="chipSend(this)">💰 Operating ratio formula</div>
+        </div>
+        <div id="chat-input-wrap">
+          <input id="chat-input" placeholder='Ask anything... e.g. "Calculate O/O settlement: $4,200 load, 75/25 split, $320 fuel advance"' onkeydown="if(event.key==='Enter')sendChat()"/>
+          <button class="btn btn-primary btn-sm" onclick="sendChat()">SEND ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LOADS ══ -->
+    <div class="page" id="page-loads">
+      <div class="page-hdr" style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><h1>Load Management</h1><p>BOL • POD • RATE TRACKING • ALL 50 STATES</p></div>
+        <button class="btn btn-primary" onclick="openModal('modal-load')">+ New Load</button>
+      </div>
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="kpi"><div class="kpi-label">Total Loads MTD</div><div class="kpi-val" style="color:var(--blue)">47</div><div class="kpi-sub">↑ 8 vs last month</div><div class="kpi-icon">📦</div></div>
+        <div class="kpi"><div class="kpi-label">Revenue MTD</div><div class="kpi-val" style="color:var(--green)">$148K</div><div class="kpi-sub">Avg $3,148/load</div><div class="kpi-icon">💵</div></div>
+        <div class="kpi"><div class="kpi-label">Avg Rate/Mile</div><div class="kpi-val" style="color:var(--orange)">$3.24</div><div class="kpi-sub">Market: $3.10–$3.80</div><div class="kpi-icon">🛣️</div></div>
+        <div class="kpi"><div class="kpi-label">On-Time Delivery</div><div class="kpi-val" style="color:var(--green)">94%</div><div class="kpi-sub">44 of 47 loads</div><div class="kpi-icon">✅</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>📦</span>All Loads</div>
+        <table class="tbl">
+          <thead><tr><th>Load ID</th><th>Origin</th><th>Destination</th><th>Miles</th><th>Rate/Mi</th><th>Gross</th><th>Truck</th><th>Driver</th><th>Pickup</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>AT-2048</td><td>Orlando, FL</td><td>Houston, TX</td><td>1,092</td><td>$3.21</td><td>$3,504</td><td>FL-201</td><td>Marcus R.</td><td>05/12</td><td><span class="badge badge-green">IN TRANSIT</span></td></tr>
+            <tr><td>AT-2049</td><td>Miami, FL</td><td>Atlanta, GA</td><td>662</td><td>$3.50</td><td>$2,317</td><td>—</td><td>O/O: J. Silva</td><td>05/12</td><td><span class="badge badge-green">IN TRANSIT</span></td></tr>
+            <tr><td>AT-2050</td><td>Orlando, FL</td><td>Charlotte, NC</td><td>728</td><td>$3.50</td><td>$2,548</td><td>FL-203</td><td>Derek W.</td><td>05/13</td><td><span class="badge badge-blue">LOADING</span></td></tr>
+            <tr><td>AT-2051</td><td>Tampa, FL</td><td>Nashville, TN</td><td>764</td><td>$3.50</td><td>$2,673</td><td>—</td><td>O/O: R. Patel</td><td>05/11</td><td><span class="badge badge-amber">DELAYED</span></td></tr>
+            <tr><td>AT-2052</td><td>Jacksonville, FL</td><td>Dallas, TX</td><td>1,024</td><td>$3.50</td><td>$3,584</td><td>FL-205</td><td>Tony M.</td><td>05/13</td><td><span class="badge badge-orange">DISPATCHED</span></td></tr>
+            <tr><td>AT-2047</td><td>Orlando, FL</td><td>New York, NY</td><td>1,092</td><td>$3.80</td><td>$4,149</td><td>FL-202</td><td>Sam K.</td><td>05/10</td><td><span class="badge badge-purple">DELIVERED</span></td></tr>
+            <tr><td>AT-2046</td><td>Miami, FL</td><td>Chicago, IL</td><td>1,376</td><td>$3.60</td><td>$4,953</td><td>—</td><td>O/O: A. Chen</td><td>05/09</td><td><span class="badge badge-purple">DELIVERED</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ OWNER-OPERATOR ══ -->
+    <div class="page" id="page-ownerop">
+      <div class="page-hdr" style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><h1>Owner-Operator Management</h1><p>SETTLEMENTS • SPLITS • ESCROW • 1099 • DEDUCTIONS</p></div>
+        <button class="btn btn-primary" onclick="openModal('modal-oo')">+ Add O/O</button>
+      </div>
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="kpi"><div class="kpi-label">Active O/Os</div><div class="kpi-val" style="color:var(--purple)">7</div><div class="kpi-sub">Under Aras MC#</div><div class="kpi-icon">🤝</div></div>
+        <div class="kpi"><div class="kpi-label">Settlements Due</div><div class="kpi-val" style="color:var(--orange)">$14,820</div><div class="kpi-sub">This Friday</div><div class="kpi-icon">💵</div></div>
+        <div class="kpi"><div class="kpi-label">Escrow Held</div><div class="kpi-val" style="color:var(--blue)">$18,500</div><div class="kpi-sub">Across 7 O/Os</div><div class="kpi-icon">🏦</div></div>
+        <div class="kpi"><div class="kpi-label">YTD 1099</div><div class="kpi-val" style="color:var(--green)">$284K</div><div class="kpi-sub">Jan–May 2025</div><div class="kpi-icon">📄</div></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-title"><span>🤝</span>Owner-Operators — Active Contracts</div>
+          <table class="tbl">
+            <thead><tr><th>Name</th><th>Truck</th><th>Split</th><th>Escrow</th><th>YTD Earnings</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>João Silva</td><td>2020 Peterbilt 389</td><td>75/25</td><td>$2,800</td><td>$48,200</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+              <tr><td>Raj Patel</td><td>2019 Kenworth T680</td><td>70/30</td><td>$2,500</td><td>$41,800</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+              <tr><td>Alex Chen</td><td>2021 Freightliner Cascadia</td><td>80/20</td><td>$3,200</td><td>$56,100</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+              <tr><td>Luis Gomez</td><td>2018 International LT</td><td>75/25</td><td>$2,200</td><td>$38,400</td><td><span class="badge badge-amber">ON HOLD</span></td></tr>
+              <tr><td>Mike Brown</td><td>2022 Volvo VNL 860</td><td>75/25</td><td>$3,000</td><td>$52,300</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>💵</span>Settlement Calculator</div>
+          <div class="form-row" style="grid-template-columns:1fr 1fr">
+            <div class="form-group"><div class="form-label">Gross Load Rate ($)</div><input class="form-input" id="oo-gross" type="number" placeholder="3200" oninput="calcSettlement()"/></div>
+            <div class="form-group"><div class="form-label">O/O Split (%)</div><select class="form-input" id="oo-split" onchange="calcSettlement()"><option value="80">80/20</option><option value="75" selected>75/25</option><option value="70">70/30</option><option value="65">65/35</option></select></div>
+          </div>
+          <div class="form-row" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="form-group"><div class="form-label">Fuel Advance ($)</div><input class="form-input" id="oo-fuel" type="number" placeholder="0" oninput="calcSettlement()"/></div>
+            <div class="form-group"><div class="form-label">Insurance ($)</div><input class="form-input" id="oo-ins" type="number" placeholder="0" oninput="calcSettlement()"/></div>
+            <div class="form-group"><div class="form-label">Other Deduct ($)</div><input class="form-input" id="oo-other" type="number" placeholder="0" oninput="calcSettlement()"/></div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;margin-top:8px" id="oo-result">
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:10px">SETTLEMENT BREAKDOWN</div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:var(--font-mono);font-size:11px">Gross Load</span><span style="font-family:var(--font-mono);font-size:11px" id="r-gross">$0.00</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:var(--font-mono);font-size:11px">O/O Share (before deductions)</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--blue)" id="r-share">$0.00</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:var(--font-mono);font-size:11px">Total Deductions</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--red)" id="r-deduct">-$0.00</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:var(--font-mono);font-size:11px">Aras Trucking Revenue</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--orange)" id="r-aras">$0.00</span></div>
+            <div class="divider" style="margin:8px 0"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-display);font-size:14px;font-weight:700">NET O/O PAYMENT</span><span style="font-family:var(--font-display);font-size:24px;font-weight:800;color:var(--green)" id="r-net">$0.00</span></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-primary btn-sm" style="flex:1" onclick="calcSettlement()">CALCULATE</button>
+            <button class="btn btn-ghost btn-sm" onclick="resetSettlement()">RESET</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>📋</span>O/O Onboarding Checklist</div>
+        <div class="grid g3">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--orange);letter-spacing:2px;margin-bottom:10px">DOCUMENTS</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> Valid CDL Class A</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> DOT Medical Card (2yr)</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> Voided Check / Direct Deposit</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> W-9 Form (1099 required)</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> PSP & DAC Report</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--orange);letter-spacing:2px;margin-bottom:10px">TRUCK REQUIREMENTS</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> Truck Registration / Title</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> Annual DOT Inspection</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> ELD Device (FMCSA compliant)</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--amber)">○</span> IFTA Stickers (if applicable)</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--amber)">○</span> IRP Plates</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--orange);letter-spacing:2px;margin-bottom:10px">INSURANCE & CONTRACT</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> Occupational Accident</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> Physical Damage / Bobtail</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> Lease Agreement Signed</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> Escrow Agreement ($2,500)</div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px"><span style="color:var(--green)">✓</span> Operating Under Aras MC#</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FUEL ══ -->
+    <div class="page" id="page-fuel">
+      <div class="page-hdr" style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><h1>Fuel Management & IFTA</h1><p>MPG TRACKING • QUARTERLY FILING • ALL 50 STATES</p></div>
+        <button class="btn btn-primary" onclick="openModal('modal-fuel')">+ Log Fuel</button>
+      </div>
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="kpi"><div class="kpi-label">MTD Gallons</div><div class="kpi-val" style="color:var(--amber)">19,840</div><div class="kpi-sub">Across 21 trucks</div><div class="kpi-icon">⛽</div></div>
+        <div class="kpi"><div class="kpi-label">MTD Fuel Cost</div><div class="kpi-val" style="color:var(--red)">$75,483</div><div class="kpi-sub">Avg $3.80/gal</div><div class="kpi-icon">💸</div></div>
+        <div class="kpi"><div class="kpi-label">Fleet Avg MPG</div><div class="kpi-val" style="color:var(--green)">6.8</div><div class="kpi-sub">Target: 7.0 MPG</div><div class="kpi-icon">🛣️</div></div>
+        <div class="kpi"><div class="kpi-label">Q2 IFTA Due</div><div class="kpi-val" style="color:var(--orange)">Jul 31</div><div class="kpi-sub">Estimated: $4,820</div><div class="kpi-icon">📋</div></div>
+      </div>
+      <div class="grid g21">
+        <div class="card">
+          <div class="card-title"><span>⛽</span>Recent Fuel Logs</div>
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Truck</th><th>Driver</th><th>State</th><th>Gallons</th><th>$/gal</th><th>Total</th><th>Odometer</th></tr></thead>
+            <tbody>
+              <tr><td>05/12</td><td>FL-201</td><td>Marcus R.</td><td>FL</td><td>180</td><td>$3.79</td><td>$682</td><td>487,240</td></tr>
+              <tr><td>05/12</td><td>FL-204</td><td>O/O: J. Silva</td><td>GA</td><td>160</td><td>$3.85</td><td>$616</td><td>312,880</td></tr>
+              <tr><td>05/11</td><td>FL-203</td><td>Derek W.</td><td>FL</td><td>200</td><td>$3.77</td><td>$754</td><td>298,410</td></tr>
+              <tr><td>05/11</td><td>FL-205</td><td>Tony M.</td><td>FL</td><td>175</td><td>$3.82</td><td>$669</td><td>401,220</td></tr>
+              <tr><td>05/10</td><td>FL-202</td><td>Sam K.</td><td>NC</td><td>190</td><td>$3.90</td><td>$741</td><td>524,110</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>📋</span>IFTA Q2 — State Summary</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px"><span>Florida (FL)</span><span style="color:var(--green)">+$1,240 credit</span></div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px"><span>Georgia (GA)</span><span style="color:var(--red)">-$380 owed</span></div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px"><span>Texas (TX)</span><span style="color:var(--red)">-$520 owed</span></div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px"><span>Tennessee (TN)</span><span style="color:var(--red)">-$210 owed</span></div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px"><span>North Carolina (NC)</span><span style="color:var(--red)">-$190 owed</span></div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px"><span>South Carolina (SC)</span><span style="color:var(--green)">+$80 credit</span></div>
+            <div class="divider" style="margin:6px 0"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-display);font-size:14px;font-weight:700">NET Q2 DUE</span><span style="font-family:var(--font-display);font-size:20px;color:var(--red);font-weight:800">-$4,820</span></div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">Due by July 31, 2025</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RENTAL ══ -->
+    <div class="page" id="page-rental">
+      <div class="page-hdr" style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><h1>Truck Rental Management</h1><p>CONTRACTS • AVAILABILITY • INVOICING • PRE/POST INSPECTION</p></div>
+        <button class="btn btn-primary" onclick="openModal('modal-rental')">+ New Rental</button>
+      </div>
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="kpi"><div class="kpi-label">Active Rentals</div><div class="kpi-val" style="color:var(--cyan)">5</div><div class="kpi-sub">3 weekly, 2 daily</div><div class="kpi-icon">🚚</div></div>
+        <div class="kpi"><div class="kpi-label">Monthly Revenue</div><div class="kpi-val" style="color:var(--green)">$22,400</div><div class="kpi-sub">From 5 contracts</div><div class="kpi-icon">💵</div></div>
+        <div class="kpi"><div class="kpi-label">Available Trucks</div><div class="kpi-val" style="color:var(--blue)">4</div><div class="kpi-sub">Ready for rental</div><div class="kpi-icon">✅</div></div>
+        <div class="kpi"><div class="kpi-label">Overdue Invoices</div><div class="kpi-val" style="color:var(--red)">1</div><div class="kpi-sub">$3,200 outstanding</div><div class="kpi-icon">⚠️</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>🚚</span>Current Rental Contracts</div>
+        <table class="tbl">
+          <thead><tr><th>Contract</th><th>Truck</th><th>Renter</th><th>Type</th><th>Rate</th><th>Start</th><th>End</th><th>Paid</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>R-1041</td><td>FL-208 (2021 KW)</td><td>Fast Move LLC</td><td>Weekly</td><td>$1,800/wk</td><td>05/06</td><td>05/13</td><td>✓ Yes</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+            <tr><td>R-1042</td><td>FL-209 (2020 Pete)</td><td>SunState Trans.</td><td>Monthly</td><td>$6,400/mo</td><td>05/01</td><td>05/31</td><td>✓ Yes</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+            <tr><td>R-1043</td><td>FL-210 (2019 FL)</td><td>Carlos M. (Ind.)</td><td>Daily</td><td>$320/day</td><td>05/10</td><td>05/14</td><td>✗ No</td><td><span class="badge badge-red">OVERDUE</span></td></tr>
+            <tr><td>R-1044</td><td>FL-211 (2022 Volvo)</td><td>Gulf Coast Exp.</td><td>Monthly</td><td>$7,200/mo</td><td>04/15</td><td>06/15</td><td>✓ Yes</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+            <tr><td>R-1045</td><td>FL-212 (2020 Int.)</td><td>Orlando Logistics</td><td>Weekly</td><td>$1,600/wk</td><td>05/08</td><td>05/15</td><td>✓ Yes</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ INSURANCE ══ -->
+    <div class="page" id="page-insurance">
+      <div class="page-hdr"><h1>Insurance Management</h1><p>POLICIES • CLAIMS • COI • RENEWALS • ALL COVERAGE TYPES</p></div>
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="kpi"><div class="kpi-label">Active Policies</div><div class="kpi-val" style="color:var(--purple)">18</div><div class="kpi-sub">All coverage types</div><div class="kpi-icon">🛡️</div></div>
+        <div class="kpi"><div class="kpi-label">Monthly Premium</div><div class="kpi-val" style="color:var(--orange)">$14,200</div><div class="kpi-sub">All policies combined</div><div class="kpi-icon">💵</div></div>
+        <div class="kpi"><div class="kpi-label">Open Claims</div><div class="kpi-val" style="color:var(--red)">2</div><div class="kpi-sub">Total: $28,400</div><div class="kpi-icon">📋</div></div>
+        <div class="kpi"><div class="kpi-label">Expiring (30d)</div><div class="kpi-val" style="color:var(--amber)">3</div><div class="kpi-sub">Action required</div><div class="kpi-icon">⏰</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-title"><span>🛡️</span>Active Policies</div>
+          <table class="tbl">
+            <thead><tr><th>Coverage Type</th><th>Carrier</th><th>Limit</th><th>Premium/mo</th><th>Expires</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Primary Liability (Fleet)</td><td>Progressive Comm.</td><td>$1,000,000</td><td>$6,200</td><td>08/15/25</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+              <tr><td>Cargo — Dry Van</td><td>Canal Insurance</td><td>$100,000</td><td>$2,800</td><td>05/24/25</td><td><span class="badge badge-red">EXP. SOON</span></td></tr>
+              <tr><td>Physical Damage (Fleet)</td><td>National Interstate</td><td>ACV</td><td>$3,100</td><td>08/15/25</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+              <tr><td>Non-Trucking Liability</td><td>Bobtail Ins. Co.</td><td>$1,000,000</td><td>$840</td><td>06/01/25</td><td><span class="badge badge-amber">RENEW</span></td></tr>
+              <tr><td>Occupational Accident</td><td>OccuCare</td><td>$500,000</td><td>$1,260</td><td>09/30/25</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>📋</span>Open Claims</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="padding:14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-family:var(--font-display);font-size:15px;font-weight:700">Claim #AT-2024-048</span><span class="badge badge-red">IN REVIEW</span></div>
+              <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">Date: 03/18/2025 • Truck: FL-203</div>
+              <div style="font-family:var(--font-mono);font-size:11px;margin-top:4px">Rear-end collision on I-95 NB (Jacksonville)</div>
+              <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--red);margin-top:6px">$18,400 estimated</div>
+            </div>
+            <div style="padding:14px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-family:var(--font-display);font-size:15px;font-weight:700">Claim #AT-2025-012</span><span class="badge badge-amber">PENDING</span></div>
+              <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">Date: 04/02/2025 • Truck: FL-207</div>
+              <div style="font-family:var(--font-mono);font-size:11px;margin-top:4px">Cargo damage — refrigeration failure (Reefer)</div>
+              <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--amber);margin-top:6px">$10,000 claimed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FINANCIALS ══ -->
+    <div class="page" id="page-finance">
+      <div class="page-hdr"><h1>Financial Management</h1><p>P&L • OPERATING RATIO • CASH FLOW • COST PER MILE</p></div>
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="kpi"><div class="kpi-label">MTD Revenue</div><div class="kpi-val" style="color:var(--green)">$148,200</div><div class="kpi-sub">Loads + Rentals</div><div class="kpi-icon">💰</div></div>
+        <div class="kpi"><div class="kpi-label">MTD Expenses</div><div class="kpi-val" style="color:var(--red)">$120,620</div><div class="kpi-sub">All operating costs</div><div class="kpi-icon">💸</div></div>
+        <div class="kpi"><div class="kpi-label">Net Profit MTD</div><div class="kpi-val" style="color:var(--green)">$27,580</div><div class="kpi-sub">18.6% margin</div><div class="kpi-icon">📈</div></div>
+        <div class="kpi"><div class="kpi-label">Operating Ratio</div><div class="kpi-val" style="color:var(--amber)">81.4%</div><div class="kpi-sub">✓ Under 85% target</div><div class="kpi-icon">📊</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-title"><span>📊</span>P&L — May 2025</div>
+          <table class="tbl">
+            <thead><tr><th>Category</th><th>Amount</th><th>% of Revenue</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--green);font-weight:700">REVENUE</td><td></td><td></td></tr>
+              <tr><td>Freight Revenue</td><td>$125,800</td><td>84.9%</td></tr>
+              <tr><td>Rental Revenue</td><td>$22,400</td><td>15.1%</td></tr>
+              <tr><td style="color:var(--green);font-weight:600">Total Revenue</td><td style="color:var(--green)">$148,200</td><td>100%</td></tr>
+              <tr><td style="color:var(--red);font-weight:700">EXPENSES</td><td></td><td></td></tr>
+              <tr><td>Fuel</td><td>$75,483</td><td>50.9%</td></tr>
+              <tr><td>Driver / O/O Pay</td><td>$21,400</td><td>14.4%</td></tr>
+              <tr><td>Maintenance</td><td>$8,240</td><td>5.6%</td></tr>
+              <tr><td>Insurance</td><td>$14,200</td><td>9.6%</td></tr>
+              <tr><td>Tolls / Permits</td><td>$1,297</td><td>0.9%</td></tr>
+              <tr><td style="color:var(--red);font-weight:600">Total Expenses</td><td style="color:var(--red)">$120,620</td><td>81.4%</td></tr>
+              <tr><td style="color:var(--green);font-weight:700">NET PROFIT</td><td style="color:var(--green);font-weight:700">$27,580</td><td style="color:var(--green)">18.6%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>📈</span>Accounts Receivable</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="padding:12px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:8px">
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--green)">CURRENT (0-30 days)</div>
+              <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--green)">$48,200</div>
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">12 invoices pending</div>
+            </div>
+            <div style="padding:12px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:8px">
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--amber)">LATE (31-60 days)</div>
+              <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--amber)">$12,400</div>
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">3 invoices — follow up</div>
+            </div>
+            <div style="padding:12px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px">
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--red)">OVERDUE (60+ days)</div>
+              <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--red)">$3,200</div>
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">1 invoice — send to collections</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 50 STATES ══ -->
+    <div class="page" id="page-states">
+      <div class="page-hdr"><h1>50 States Operations</h1><p>CLICK ANY STATE FOR REGULATIONS • PERMITS • FUEL TAX • TOLLS</p></div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <input class="form-input" id="state-search" placeholder="Search state..." oninput="filterStates()" style="width:200px"/>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="badge badge-orange" style="padding:5px 10px">⭐ HQ Florida</span>
+            <span class="badge badge-blue" style="padding:5px 10px">🛣️ Active Routes</span>
+            <span class="badge badge-purple" style="padding:5px 10px">⚠️ Special Regs</span>
+          </div>
+        </div>
+      </div>
+      <div class="states-grid" id="states-grid"></div>
+    </div>
+
+    <!-- ══ COMPLIANCE ══ -->
+    <div class="page" id="page-compliance">
+      <div class="page-hdr"><h1>DOT / FMCSA Compliance</h1><p>CSA SCORES • HOS • CDL • ANNUAL INSPECTIONS • ELD</p></div>
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="kpi"><div class="kpi-label">CSA Safety Score</div><div class="kpi-val" style="color:var(--green)">28</div><div class="kpi-sub">Out of 100 (lower=better)</div><div class="kpi-icon">✅</div></div>
+        <div class="kpi"><div class="kpi-label">HOS Violations</div><div class="kpi-val" style="color:var(--green)">0</div><div class="kpi-sub">This month</div><div class="kpi-icon">⏱️</div></div>
+        <div class="kpi"><div class="kpi-label">DOT Inspections Due</div><div class="kpi-val" style="color:var(--amber)">3</div><div class="kpi-sub">Schedule by 06/30</div><div class="kpi-icon">🔧</div></div>
+        <div class="kpi"><div class="kpi-label">Medical Cards</div><div class="kpi-val" style="color:var(--green)">18/18</div><div class="kpi-sub">All current</div><div class="kpi-icon">🩺</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-title"><span>⏱️</span>HOS Rules — Quick Reference</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--orange)"><div style="font-family:var(--font-mono);font-size:10px;color:var(--orange)">11-HOUR RULE</div><div style="font-size:12px;margin-top:2px">Drive max 11 hrs after 10 consecutive hrs off duty</div></div>
+            <div style="padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--blue)"><div style="font-family:var(--font-mono);font-size:10px;color:var(--blue)">14-HOUR RULE</div><div style="font-size:12px;margin-top:2px">Cannot drive beyond 14th hour after coming on duty</div></div>
+            <div style="padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--purple)"><div style="font-family:var(--font-mono);font-size:10px;color:var(--purple)">60/70-HOUR RULE</div><div style="font-size:12px;margin-top:2px">Max 60 hrs/7 days or 70 hrs/8 days on duty</div></div>
+            <div style="padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--green)"><div style="font-family:var(--font-mono);font-size:10px;color:var(--green)">30-MIN BREAK RULE</div><div style="font-size:12px;margin-top:2px">Required after 8 cumulative driving hours</div></div>
+            <div style="padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--cyan)"><div style="font-family:var(--font-mono);font-size:10px;color:var(--cyan)">34-HOUR RESTART</div><div style="font-size:12px;margin-top:2px">Reset 60/70-hr clock with 34 consecutive hrs off</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>📋</span>Driver Compliance Status</div>
+          <table class="tbl">
+            <thead><tr><th>Driver</th><th>CDL Class</th><th>Medical Exp.</th><th>HOS Status</th><th>Drug Test</th></tr></thead>
+            <tbody>
+              <tr><td>Marcus R.</td><td>Class A</td><td>09/2026</td><td><span class="badge badge-green">COMPLIANT</span></td><td><span class="badge badge-green">CURRENT</span></td></tr>
+              <tr><td>Derek W.</td><td>Class A + HazMat</td><td>03/2026</td><td><span class="badge badge-green">COMPLIANT</span></td><td><span class="badge badge-green">CURRENT</span></td></tr>
+              <tr><td>Tony M.</td><td>Class A</td><td>11/2025</td><td><span class="badge badge-green">COMPLIANT</span></td><td><span class="badge badge-amber">DUE 06/25</span></td></tr>
+              <tr><td>Sam K.</td><td>Class A + HazMat</td><td>07/2026</td><td><span class="badge badge-green">COMPLIANT</span></td><td><span class="badge badge-green">CURRENT</span></td></tr>
+              <tr><td>O/O: J. Silva</td><td>Class A</td><td>05/2027</td><td><span class="badge badge-green">COMPLIANT</span></td><td><span class="badge badge-green">CURRENT</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══ MODALS ══ -->
+<div class="modal-overlay" id="modal-load">
+  <div class="modal">
+    <div class="modal-title">📦 Add New Load</div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr"><div class="form-group"><div class="form-label">Origin City, State</div><input class="form-input" placeholder="Orlando, FL"/></div><div class="form-group"><div class="form-label">Destination City, State</div><input class="form-input" placeholder="Houston, TX"/></div></div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr 1fr"><div class="form-group"><div class="form-label">Miles</div><input class="form-input" type="number" placeholder="1092"/></div><div class="form-group"><div class="form-label">Rate per Mile ($)</div><input class="form-input" type="number" placeholder="3.21"/></div><div class="form-group"><div class="form-label">Pickup Date</div><input class="form-input" type="date"/></div></div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr"><div class="form-group"><div class="form-label">Truck / Driver</div><input class="form-input" placeholder="FL-201 / Marcus R."/></div><div class="form-group"><div class="form-label">Broker / Shipper</div><input class="form-input" placeholder="Echo Global Logistics"/></div></div>
+    <div class="form-row"><div class="form-group"><div class="form-label">Commodity / Notes</div><input class="form-input" placeholder="General freight, no hazmat"/></div></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-load')">Cancel</button><button class="btn btn-primary">Save Load</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-oo">
+  <div class="modal">
+    <div class="modal-title">🤝 Add Owner-Operator</div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr"><div class="form-group"><div class="form-label">Full Name</div><input class="form-input" placeholder="João Silva"/></div><div class="form-group"><div class="form-label">Phone</div><input class="form-input" placeholder="(407) 555-0100"/></div></div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr"><div class="form-group"><div class="form-label">Truck Year/Make/Model</div><input class="form-input" placeholder="2020 Peterbilt 389"/></div><div class="form-group"><div class="form-label">Pay Split</div><select class="form-input"><option>80/20</option><option selected>75/25</option><option>70/30</option></select></div></div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr"><div class="form-group"><div class="form-label">Escrow Amount ($)</div><input class="form-input" type="number" placeholder="2500"/></div><div class="form-group"><div class="form-label">Contract Start Date</div><input class="form-input" type="date"/></div></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-oo')">Cancel</button><button class="btn btn-primary">Save O/O</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-fuel">
+  <div class="modal">
+    <div class="modal-title">⛽ Log Fuel Purchase</div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr"><div class="form-group"><div class="form-label">Truck ID</div><input class="form-input" placeholder="FL-201"/></div><div class="form-group"><div class="form-label">Driver / O/O</div><input class="form-input" placeholder="Marcus R."/></div></div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr 1fr"><div class="form-group"><div class="form-label">State</div><select class="form-input" id="fuel-state-select"></select></div><div class="form-group"><div class="form-label">Gallons</div><input class="form-input" type="number" placeholder="180"/></div><div class="form-group"><div class="form-label">Price per Gallon ($)</div><input class="form-input" type="number" placeholder="3.79"/></div></div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr"><div class="form-group"><div class="form-label">Odometer Reading</div><input class="form-input" type="number" placeholder="487240"/></div><div class="form-group"><div class="form-label">Date</div><input class="form-input" type="date"/></div></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-fuel')">Cancel</button><button class="btn btn-primary">Save Log</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-rental">
+  <div class="modal">
+    <div class="modal-title">🚚 New Rental Contract</div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr"><div class="form-group"><div class="form-label">Renter Name / Company</div><input class="form-input" placeholder="Fast Move LLC"/></div><div class="form-group"><div class="form-label">Truck Assigned</div><input class="form-input" placeholder="FL-208"/></div></div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr 1fr"><div class="form-group"><div class="form-label">Rental Type</div><select class="form-input"><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div><div class="form-group"><div class="form-label">Rate ($)</div><input class="form-input" type="number" placeholder="1800"/></div><div class="form-group"><div class="form-label">Start Date</div><input class="form-input" type="date"/></div></div>
+    <div class="form-row"><div class="form-group"><div class="form-label">Notes / Conditions</div><input class="form-input" placeholder="Fuel full in, full out. Mileage cap: 2,000/mo"/></div></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-rental')">Cancel</button><button class="btn btn-primary">Save Contract</button></div>
+  </div>
+</div>
+
+<!-- ══ MODAL CLICK OUTSIDE CLOSE ══ -->
+<script>
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+
+// ── NAV ──
+function showPage(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  const titles={dashboard:'DASHBOARD',ai:'AI ASSISTANT',loads:'LOADS',ownerop:'OWNER-OPERATOR',fuel:'FUEL / IFTA',rental:'RENTAL',insurance:'INSURANCE',finance:'FINANCIALS',states:'50 STATES',compliance:'DOT / FMCSA'};
+  document.getElementById('topbar-title').textContent=titles[id]||id.toUpperCase();
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+
+// ── STATES ──
+const US_STATES=[
+  {code:'AL',name:'Alabama'},{code:'AK',name:'Alaska'},{code:'AZ',name:'Arizona'},
+  {code:'AR',name:'Arkansas'},{code:'CA',name:'California'},{code:'CO',name:'Colorado'},
+  {code:'CT',name:'Connecticut'},{code:'DE',name:'Delaware'},{code:'FL',name:'Florida'},
+  {code:'GA',name:'Georgia'},{code:'HI',name:'Hawaii'},{code:'ID',name:'Idaho'},
+  {code:'IL',name:'Illinois'},{code:'IN',name:'Indiana'},{code:'IA',name:'Iowa'},
+  {code:'KS',name:'Kansas'},{code:'KY',name:'Kentucky'},{code:'LA',name:'Louisiana'},
+  {code:'ME',name:'Maine'},{code:'MD',name:'Maryland'},{code:'MA',name:'Massachusetts'},
+  {code:'MI',name:'Michigan'},{code:'MN',name:'Minnesota'},{code:'MS',name:'Mississippi'},
+  {code:'MO',name:'Missouri'},{code:'MT',name:'Montana'},{code:'NE',name:'Nebraska'},
+  {code:'NV',name:'Nevada'},{code:'NH',name:'New Hampshire'},{code:'NJ',name:'New Jersey'},
+  {code:'NM',name:'New Mexico'},{code:'NY',name:'New York'},{code:'NC',name:'North Carolina'},
+  {code:'ND',name:'North Dakota'},{code:'OH',name:'Ohio'},{code:'OK',name:'Oklahoma'},
+  {code:'OR',name:'Oregon'},{code:'PA',name:'Pennsylvania'},{code:'RI',name:'Rhode Island'},
+  {code:'SC',name:'South Carolina'},{code:'SD',name:'South Dakota'},{code:'TN',name:'Tennessee'},
+  {code:'TX',name:'Texas'},{code:'UT',name:'Utah'},{code:'VT',name:'Vermont'},
+  {code:'VA',name:'Virginia'},{code:'WA',name:'Washington'},{code:'WV',name:'West Virginia'},
+  {code:'WI',name:'Wisconsin'},{code:'WY',name:'Wyoming'}
+];
+function buildStates(filter=''){
+  const grid=document.getElementById('states-grid');
+  grid.innerHTML='';
+  US_STATES.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())||s.code.toLowerCase().includes(filter.toLowerCase())).forEach(s=>{
+    const isFL=s.code==='FL';
+    const card=document.createElement('div');
+    card.className='state-card'+(isFL?' hq':'');
+    card.innerHTML=`<div class="state-code">${s.code}</div><div class="state-name">${s.name}</div>${isFL?'<div class="state-hq">HQ ⭐</div>':''}`;
+    card.onclick=()=>askStateInfo(s);
+    grid.appendChild(card);
+  });
+}
+function filterStates(){buildStates(document.getElementById('state-search').value)}
+buildStates();
+
+// Populate fuel modal state select
+const fuelSel=document.getElementById('fuel-state-select');
+US_STATES.forEach(s=>{const o=document.createElement('option');o.value=s.code;o.textContent=s.name;fuelSel.appendChild(o);});
+
+function askStateInfo(s){
+  showPage('ai',document.querySelectorAll('.nav-btn')[1]);
+  setTimeout(()=>sendMessageToAI(`What are the trucking regulations, IFTA fuel tax rate, weight limits, permit requirements, toll roads, and any special rules for ${s.name} (${s.code})?`),200);
+}
+
+// ── SETTLEMENT CALCULATOR ──
+function calcSettlement(){
+  const gross=parseFloat(document.getElementById('oo-gross').value)||0;
+  const split=parseFloat(document.getElementById('oo-split').value)||75;
+  const fuel=parseFloat(document.getElementById('oo-fuel').value)||0;
+  const ins=parseFloat(document.getElementById('oo-ins').value)||0;
+  const other=parseFloat(document.getElementById('oo-other').value)||0;
+  const share=gross*(split/100);
+  const deductions=fuel+ins+other;
+  const aras=gross-share;
+  const net=share-deductions;
+  document.getElementById('r-gross').textContent='$'+gross.toFixed(2);
+  document.getElementById('r-share').textContent='$'+share.toFixed(2);
+  document.getElementById('r-deduct').textContent='-$'+deductions.toFixed(2);
+  document.getElementById('r-aras').textContent='$'+aras.toFixed(2);
+  document.getElementById('r-net').textContent='$'+net.toFixed(2);
+  document.getElementById('r-net').style.color=net>=0?'var(--green)':'var(--red)';
+}
+function resetSettlement(){
+  ['oo-gross','oo-fuel','oo-ins','oo-other'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('oo-split').value='75';
+  ['r-gross','r-share','r-deduct','r-aras','r-net'].forEach(id=>document.getElementById(id).textContent='$0.00');
+}
+
+// ── AI CHAT ──
+const SYSTEM=`You are the operations management AI assistant for "Aras Trucking LLC", headquartered in Orlando, Florida, USA, operating across all 50 US states. Expert in: fuel/IFTA, loads/freight, owner-operator settlements, truck rental, insurance (US trucking), financials, DOT/FMCSA compliance, all 50 state regulations. Use USD, miles, gallons. Be direct and provide specific numbers. You can respond in English or Portuguese based on user preference. Use emojis to organize responses.`;
+let chatHistory=[];
+
+async function sendMessageToAI(text){
+  const msgs=document.getElementById('chat-messages');
+  chatHistory.push({role:'user',content:text});
+  const uDiv=document.createElement('div');
+  uDiv.className='chat-msg';
+  uDiv.style.justifyContent='flex-end';
+  uDiv.innerHTML=`<div class="chat-bubble user">${text}</div><div class="chat-avatar user">👤</div>`;
+  msgs.appendChild(uDiv);
+  const typing=document.createElement('div');
+  typing.className='chat-msg';
+  typing.id='typing-indicator';
+  typing.innerHTML=`<div class="chat-avatar ai">🚛</div><div class="chat-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(typing);
+  msgs.scrollTop=msgs.scrollHeight;
+  document.getElementById('quick-chips').style.display='none';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM,messages:chatHistory})});
+    const data=await res.json();
+    const reply=data.content?.find(b=>b.type==='text')?.text||'Error getting response.';
+    chatHistory.push({role:'assistant',content:reply});
+    document.getElementById('typing-indicator')?.remove();
+    const aDiv=document.createElement('div');
+    aDiv.className='chat-msg';
+    aDiv.innerHTML=`<div class="chat-avatar ai">🚛</div><div class="chat-bubble">${formatAI(reply)}</div>`;
+    msgs.appendChild(aDiv);
+    msgs.scrollTop=msgs.scrollHeight;
+  }catch(e){
+    document.getElementById('typing-indicator')?.remove();
+    const err=document.createElement('div');
+    err.className='chat-msg';
+    err.innerHTML=`<div class="chat-avatar ai">🚛</div><div class="chat-bubble" style="color:var(--red)">⚠️ Connection error. Please try again.</div>`;
+    msgs.appendChild(err);
+  }
+}
+function sendChat(){
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  sendMessageToAI(text);
+}
+function chipSend(el){sendMessageToAI(el.textContent.trim())}
+document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat()});
+
+function formatAI(text){
+  return text
+    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/^## (.+)$/gm,'<h2>$2</h2>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^- (.+)$/gm,'<div class="bullet">$1</div>')
+    .replace(/\n\n/g,'<br/><br/>')
+    .replace(/\n/g,'<br/>');
+}
+</script>
+</body>
+</html>
